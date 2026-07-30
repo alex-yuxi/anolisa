@@ -329,6 +329,16 @@ This section intentionally does not duplicate the spec. Do NOT invent documentat
 - All code and comments must be in **English**
 - Do not hide errors or risks — make them visible and actionable
 - Every change should not only implement the desired functionality but also improve codebase quality
+- **Sensitive-data gate (mandatory)**: no commit may introduce IP addresses,
+  passwords, API keys, tokens, private keys, or any other credential material.
+  Before EVERY commit, run `scripts/check-sensitive-data.sh --staged` and
+  record a clean result — a finding blocks the commit until the data is
+  redacted (placeholder or environment variable) or a justified allowlist
+  entry lands in `.github/sensitive-scan-allowlist.txt`. Install the local
+  hook once via `scripts/check-sensitive-data.sh --install-hook`; CI enforces
+  the same scan on every PR (`prelint.yml` · Sensitive Data Scan). Server
+  addresses and credentials are injected at runtime through environment
+  variables only — never written into repository files.
 
 ## 11. Scoped Module Rules
 

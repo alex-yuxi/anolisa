@@ -2,9 +2,10 @@
 # PR Lint gate — Commit Message + PR Title + Branch Name + Issue Link
 #
 # Jobs:
-#   commit-lint  — requires checkout; runs independently
-#   pr-checks    — all github-script checks consolidated into one runner
-#                  (PR title, branch name, linked issue)
+#   commit-lint     — requires checkout; runs independently
+#   pr-checks       — all github-script checks consolidated into one runner
+#                     (PR title, branch name, linked issue)
+#   sensitive-scan  — blocks PRs that add IPs / credentials to the tree
 ###############################################################################
 
 name: 🔍 PR Lint
@@ -36,7 +37,24 @@ jobs:
           configFile: .github/commitlint.config.json
 
   # =========================================================================
-  # Job 2: PR Checks (title + branch name + linked issue + merge hint)
+  # Job 2: Sensitive Data Scan — no IPs, passwords, keys or tokens may be
+  # ADDED by a PR. Mirrors the local pre-commit gate
+  # (scripts/check-sensitive-data.sh --staged); see AGENTS.md §10.
+  # =========================================================================
+  sensitive-scan:
+    name: 🔒 Sensitive Data Scan
+    runs-on: anolisa-k8s-general-ci-x64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan added lines for IPs / credentials
+        run: |
+          bash scripts/check-sensitive-data.sh --diff "origin/${{ github.base_ref }}...HEAD"
+
+  # =========================================================================
+  # Job 3: PR Checks (title + branch name + linked issue + merge hint)
   # All steps run with continue-on-error so every check is always reported
   # in one pass — contributors see all warnings at once, not one at a time.
   # None of these checks block the PR (warnings only); only commit scope

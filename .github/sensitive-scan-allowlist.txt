@@ -1,0 +1,9 @@
+# Allowlist for scripts/check-sensitive-data.sh — one extended regex per line.
+#
+# A finding whose full "file:line:content" record matches ANY regex below is
+# suppressed. Every entry MUST carry a justification comment directly above
+# it and should be as narrow as possible (anchor on the file path).
+#
+# Example:
+#   # docs/foo.md quotes RFC 3849 IPv6 documentation samples
+#   ^docs/foo\.md:.*2001:db8
